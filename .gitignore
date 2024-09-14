@@ -1,3 +1,9 @@
+__pycache__
+.venv
+keys.py
+
+/Data Processing/Data
+
 # History files
 .Rhistory
 .Rapp.history
