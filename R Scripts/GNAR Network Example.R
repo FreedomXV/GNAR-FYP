@@ -59,3 +59,8 @@ fiveVTS3 = GNARsim(n = 200, net = fiveNet, alphaParams = list(rep(0.2, 5), rep(0
 
 print(GNARfit(vts = fiveVTS3, net = fiveNet, alphaOrder = 2, betaOrder =c(2,0)))
 
+fiveVTS4 <- simulate(GNARfit(vts = fiveVTS2, net = fiveNet, alphaOrder = 1, betaOrder = 1, globalalpha = FALSE), n = 200)
+
+# Section 2.6 GNAR Network Example
+# Missing data and changing connection weights
+

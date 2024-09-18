@@ -13,7 +13,7 @@ endpoints = [
 api_url = 'http://datamall2.mytransport.sg/ltaodataservice/TrafficFlow'
 print(api_url)
 
-def main():
+if __name__ == '__main__':
 
     dataset_base_path = os.path.join(os.getcwd(), 'Data')
 
