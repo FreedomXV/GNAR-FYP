@@ -7,6 +7,8 @@ library("igraph")
 # set.seed(1)
 
 plot(fiveNet, vertex.label = c("A", "B", "C", "D", "E"))
+typeof(fiveNet)
+class(fiveNet)
 print(fiveNet)
 summary(fiveNet)
 
@@ -21,6 +23,8 @@ print(igraphtoGNAR(g))
 
 as.matrix(fiveNet)
 
+mat = matrix(c(1,2,3), c(4,5,6), ncol=3, nrow=2)
+mat
 set.seed(920)
 adj <- matrix(runif(9), ncol = 3, nrow = 3)
 adj[adj < 0.3] <- 0
@@ -41,7 +45,7 @@ lines(fitted(answer)[, 1], col = 2)
 myresiduals = residuals(answer)[, 1]
 layout(matrix(c(1,2), 2, 1))
 par(mar = c(4.1, 4.1, 0, 2.1), cex.axis = 0.9)
-plot(ts(residuals(answer)[, 1]), ylab = "answer model residuals")st
+plot(ts(residuals(answer)[, 1]), ylab = "answer model residuals")
 par(mar = c(4.1, 4.1, 2.1, 2.1), cex.axis = 0.9)
 hist(residuals(answer)[, 1], main= "", xlab = "answer model residuals")
 

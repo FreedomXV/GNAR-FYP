@@ -10,6 +10,15 @@ oldpar = par(cex = 0.75)
 windnetplot()
 par(oldpar)
 
+help(GNAR)
+vswind
+vswindnet
+vswindts
+vswindcoords
+vswindnames
+vswindcoords
+write.csv(vswindts, "vswindts.csv")
+
 BIC(GNARfit(vts = vswindts, net = vswindnet, alphaOrder = 1, betaOrder = 0))
 
 BIC(GNARfit(vts = vswindts, net = vswindnet, alphaOrder = 1, betaOrder = 0, globalalpha = FALSE))
