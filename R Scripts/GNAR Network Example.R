@@ -68,3 +68,39 @@ fiveVTS4 <- simulate(GNARfit(vts = fiveVTS2, net = fiveNet, alphaOrder = 1, beta
 # Section 2.6 GNAR Network Example
 # Missing data and changing connection weights
 
+
+## -----------------------
+## Scrap code from MRT
+
+# MANUALLY Defining MRT Net
+# TODO Find automatic way to do it
+# mrt_list = matrix(0, nrow = length(station_network_list), ncol = length(station_network_list))
+# rownames(mrt_list) = station_network_list
+# colnames(mrt_list) = station_network_list
+# mrt_list
+# 
+# mrt_list['TE1', 'NS9.TE2'] = 1
+# mrt_list['NS9.TE2', 'TE1'] = 1
+# mrt_list['NS9.TE2', 'TE3'] = 1
+# mrt_list['NS9.TE2', 'NS8'] = 1
+# mrt_list['NS9.TE2', 'NS10'] = 1
+# mrt_list['TE3', 'NS9.TE2'] = 1
+# mrt_list['NS8', 'NS9.TE2'] = 1
+# mrt_list['NS10', 'NS9.TE2'] = 1
+# 
+# mrt_list
+# mrt_net = matrixtoGNAR(mrt_list)
+# mrt_net
+# plot(mrt_net, vertex.label = station_network_list)
+
+
+
+
+# Covering Woodlands Examples ONLY
+# TE1, NS9/TE2, TE3, NS8, NS10
+
+# mrt_list = read.csv('Data Processing/Data/Master Sets/StationTimeSeries_TapInVolume.csv')
+# station_network_list = c('TE1', 'NS9.TE2', 'TE3', 'NS8', 'NS10')
+# station_network = subset(mrt_data, PT_CODE %in% station_network_list)
+# station_network
+
