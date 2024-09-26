@@ -15,7 +15,7 @@ print(api_url)
 
 if __name__ == '__main__':
 
-    dataset_base_path = os.path.join(os.getcwd(), 'Data')
+    dataset_base_path = os.path.join(os.getcwd(), '..', 'Data')
 
     if not os.path.exists(dataset_base_path):
         os.makedirs(dataset_base_path)
