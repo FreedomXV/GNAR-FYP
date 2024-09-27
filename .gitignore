@@ -2,7 +2,8 @@ __pycache__
 .venv
 keys.py
 
-/Data Processing/Data
+/Data Processing/Data/LTA API
+/Data Processing/Data/LTA Static Data
 
 # History files
 .Rhistory
