@@ -1,6 +1,7 @@
 # R Script Testing for MRT Stations
+Sys.getenv()
 setwd("C:/Users/shygu/Documents/GitHub/GNAR-FYP")
-setwd("C:\Users\USER\Documents\GitHub\GNAR-FYP")
+setwd("C:/Users/USER/Documents/GitHub/GNAR-FYP")
 
 library("GNAR")
 library("igraph")
