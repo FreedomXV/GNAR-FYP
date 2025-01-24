@@ -18,7 +18,7 @@ station_network_list = c(names(mrt_adjacency))
 # station_network_list = c('TE15', 'TE16', 'TE18', 'TE19')
 station_network_list
 
-mrt_tapin_ts = read.csv('Data Processing/Data/Master Sets/StationTimeSeries_TapInVolume_Hourly.csv', header = TRUE, row.names = 1)
+mrt_tapin_ts = read.csv('Data Processing/Data/Master Sets/StationTimeSeries_TapInVolume.csv', header = TRUE, row.names = 1)
 mrt_tapin_ts = mrt_tapin_ts %>% select(any_of(station_network_list))
 mrt_tapin_ts
 mrt_tapin_ts = ts(mrt_tapin_ts)
@@ -40,12 +40,16 @@ answer
 #alphaOrder and betaOrder ??
 
 forecast_steps = 24
-mrt_stn_focus = 5
+mrt_stn_focus = 1
+
+mrt_tapin_ts
+mrt_tapin_ts[4,] = NA 
+mrt_tapin_ts[5,] = NA 
 
 coef(answer)
 ts_shifted <- c(mrt_tapin_ts[, mrt_stn_focus], rep(NA, forecast_steps))
-plot(mrt_tapin_ts[, mrt_stn_focus], ylab = "Node A Time Series")
-plot(ts_shifted, ylab = "Node A Time Series", type = "l")
+plot(mrt_tapin_ts[, mrt_stn_focus], ylab = "Passenger Volume")
+plot(ts_shifted, ylab = "Passenger Volume", type = "l")
 
 fitted_shifted <- c(rep(NA, alphaOrder-1), fitted(answer)[, mrt_stn_focus])
 lines(fitted_shifted, col = 2)
