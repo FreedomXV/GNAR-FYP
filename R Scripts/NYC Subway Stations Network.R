@@ -29,8 +29,8 @@ nyc_net
 
 plot(nyc_net, vertex.label = station_network_labels, arrow.mode = '-', directed = FALSE)
 
-alphaOrder = 2
-betaOrder = c(1,1)
+alphaOrder = 7
+betaOrder = c(rep(1, alphaOrder))
 
 answer = GNARfit(vts = nyc_ts, net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
 
@@ -46,7 +46,7 @@ plot(nyc_ts[, nyc_stn_focus], ylab = "Ridership Volume")
 plot(ts_shifted, ylab = "Ridership Volume", type = "l")
 
 fitted_ans = fitted(answer)
-fitted_shifted = c(rep(NA, alphaOrder-1), fitted_ans[, nyc_stn_focus])
+fitted_shifted = c(rep(NA, alphaOrder), fitted_ans[, nyc_stn_focus])
 lines(fitted_shifted, col = 2)
 
 pred = predict(answer, n.ahead = forecast_steps)
