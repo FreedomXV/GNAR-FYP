@@ -7,17 +7,25 @@ library("GNAR")
 library("igraph")
 library("tidyverse")
 
+frequency = 'monthly'
+alphaOrder = 6
+betaRep = 1
+betaOrder = c(rep(betaRep, alphaOrder))
+forecast_steps = 12
+nyc_stn_focus = 1
+
 nyc_adjacency = read.csv('Data Processing/Data/Master Sets/NYC Master/NYC_Subway_Adjacency_Matrix.csv', header = TRUE, row.names = 1)
 colnames(nyc_adjacency) = gsub("X", "", colnames(nyc_adjacency))
 nyc_adjacency
 station_network_list = c(names(nyc_adjacency))
 station_network_list
 
-frequency = 'daily'
 filepath = paste('Data Processing/Data/Master Sets/NYC Master/NYC_Time_Series_', frequency, '.csv', sep="")
 nyc_ts = read.csv(filepath, header = TRUE, row.names = 1)
 colnames(nyc_ts) = gsub("X", "", colnames(nyc_ts))
 nyc_ts = nyc_ts %>% select(any_of(station_network_list))
+time_intervals = length(rownames(nyc_ts))
+nyc_ts = nyc_ts[(time_intervals-30):time_intervals,]
 nyc_ts
 nyc_ts = ts(nyc_ts)
 class(nyc_ts)
@@ -29,14 +37,9 @@ nyc_net
 
 plot(nyc_net, vertex.label = station_network_labels, arrow.mode = '-', directed = FALSE)
 
-alphaOrder = 365
-betaRep = 3
-betaOrder = c(rep(betaRep, alphaOrder))
-
 answer = GNARfit(vts = nyc_ts, net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
 
-forecast_steps = 365
-nyc_stn_focus = 1
+
 
 nyc_ts
 
