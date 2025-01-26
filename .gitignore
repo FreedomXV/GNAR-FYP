@@ -7,6 +7,8 @@ keys.py
 /Data Processing/Data/ST-LLM Data
 /Data Processing/Data/NYC Data
 
+/R Scripts/GNAR Predictions/archive
+
 # History files
 .Rhistory
 .Rapp.history

@@ -29,21 +29,30 @@ nyc_net
 
 plot(nyc_net, vertex.label = station_network_labels, arrow.mode = '-', directed = FALSE)
 
-alphaOrder = 7
-betaOrder = c(rep(1, alphaOrder))
+alphaOrder = 365
+betaRep = 3
+betaOrder = c(rep(betaRep, alphaOrder))
 
 answer = GNARfit(vts = nyc_ts, net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
 
-forecast_steps = 30
+forecast_steps = 365
 nyc_stn_focus = 1
 
 nyc_ts
 
+save_dir = paste('R Scripts/GNAR Predictions/', frequency, '_alpha', alphaOrder, '_beta', betaRep, '_forecast', forecast_steps, '/', sep="")
+dir.create(file.path(save_dir))
 coef(answer)
+coefout = paste(save_dir, 'coefficients_', frequency, '_alpha', alphaOrder, '_forecast', forecast_steps, '.csv', sep="")
+write.csv(coef(answer), coefout)
 
 ts_shifted = c(nyc_ts[, nyc_stn_focus], rep(NA, forecast_steps))
-plot(nyc_ts[, nyc_stn_focus], ylab = "Ridership Volume")
-plot(ts_shifted, ylab = "Ridership Volume", type = "l")
+plot(nyc_ts[, nyc_stn_focus], ylab = "Ridership Volume", xlab = "Timestamp")
+plotout1 = paste(save_dir, 'timeplot_', frequency, '_alpha', alphaOrder, '_forecast', forecast_steps, '.png', sep="")
+dev.copy(png, filename=plotout1, width = 1920, height = 1080)
+dev.off()
+
+plot(ts_shifted, ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
 
 fitted_ans = fitted(answer)
 fitted_shifted = c(rep(NA, alphaOrder), fitted_ans[, nyc_stn_focus])
@@ -55,4 +64,9 @@ pred
 
 pred_shifted = c(rep(NA, nrow(nyc_ts)), pred[, nyc_stn_focus])
 lines(pred_shifted, col = 3)
+plotout2 = paste(save_dir, 'predictionplot_', frequency, '_alpha', alphaOrder, '_forecast', forecast_steps, '.png', sep="")
+dev.copy(png, filename=plotout2, width = 1920, height = 1080)
+dev.off()
 
+fileout = paste(save_dir, 'predictions_', frequency, '_alpha', alphaOrder, '_forecast', forecast_steps, '.csv', sep="")
+write.csv(pred, fileout)
