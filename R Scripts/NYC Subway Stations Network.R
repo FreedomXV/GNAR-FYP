@@ -39,8 +39,6 @@ plot(nyc_net, vertex.label = station_network_labels, arrow.mode = '-', directed 
 
 answer = GNARfit(vts = nyc_ts, net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
 
-
-
 nyc_ts
 
 save_dir = paste('R Scripts/GNAR Predictions/', frequency, '_alpha', alphaOrder, '_beta', betaRep, '_forecast', forecast_steps, '/', sep="")
