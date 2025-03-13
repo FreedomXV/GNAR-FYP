@@ -68,6 +68,22 @@ fiveVTS4 <- simulate(GNARfit(vts = fiveVTS2, net = fiveNet, alphaOrder = 1, beta
 # Section 2.6 GNAR Network Example
 # Missing data and changing connection weights
 
+fiveVTS0 <- fiveVTS
+fiveVTS0[50:150, 3] <- NA
+nafit <- GNARfit(vts = fiveVTS0, net = fiveNet, alphaOrder = 2, betaOrder = c(1, 1))
+layout(matrix(c(1, 2), 2, 1))
+par(mar = c(4.1, 4.1, 0.75, 2.1), cex.axis = 0.75)
+plot(ts(fitted(nafit)[, 3]), ylab = "Node C fitted values")
+par(mar = c(4.1, 4.1, 0.75, 2.1), cex.axis = 0.75)
+plot(ts(fitted(nafit)[, 4]), ylab = "Node D fitted values")
+
+# Section 2.7 Stationarity conditions
+
+set.seed(10)
+fiveVTS4 <- GNARsim(n = 200, net = fiveNet, alphaParams = list(rep(0.2, 5)), betaParams = list(c(0.85)))
+c(mean(fiveVTS4[1:50, ]), mean(fiveVTS4[51:100, ]), mean(fiveVTS4[101:150, ]), mean(fiveVTS4[151:200, ]))
+
+
 
 ## -----------------------
 ## Scrap code from MRT
