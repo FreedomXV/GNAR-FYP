@@ -18,7 +18,7 @@ betaOrder = c(rep(betaRep, alphaOrder))
 nyc_adjacency = read.csv('Data Processing/Data/Master Sets/NYC Master/NYC_Subway_Adjacency_Matrix.csv', header = TRUE, row.names = 1)
 colnames(nyc_adjacency) = gsub("X", "", colnames(nyc_adjacency))
 nyc_adjacency
-station_network_list = c(names(nyc_adjacency))[1:10]
+station_network_list = c(names(nyc_adjacency))
 station_network_list
 
 filepath = paste('Data Processing/Data/Master Sets/NYC Master/NYC_Time_Series_', frequency, '_ridership.csv', sep="")
