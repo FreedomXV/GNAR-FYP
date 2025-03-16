@@ -1,4 +1,5 @@
-# R Script Testing for nyc subway Stations
+# R Script Testing for NYC subway Stations
+# Maybe Rewrite this in a cleaner way such that I remember whats going
 dir = paste(Sys.getenv("R_USER"), "/GitHub/GNAR-FYP", sep = "")
 dir
 setwd(dir)
@@ -8,24 +9,23 @@ library("igraph")
 library("tidyverse")
 
 frequency = 'monthly'
-alphaOrder = 6
+alphaOrder = 1
 betaRep = 1
 betaOrder = c(rep(betaRep, alphaOrder))
-forecast_steps = 12
-nyc_stn_focus = 1
+# forecast_steps = 12
+# nyc_stn_focus = 1
 
 nyc_adjacency = read.csv('Data Processing/Data/Master Sets/NYC Master/NYC_Subway_Adjacency_Matrix.csv', header = TRUE, row.names = 1)
 colnames(nyc_adjacency) = gsub("X", "", colnames(nyc_adjacency))
 nyc_adjacency
-station_network_list = c(names(nyc_adjacency))
+station_network_list = c(names(nyc_adjacency))[1:10]
 station_network_list
 
-filepath = paste('Data Processing/Data/Master Sets/NYC Master/NYC_Time_Series_', frequency, '.csv', sep="")
+filepath = paste('Data Processing/Data/Master Sets/NYC Master/NYC_Time_Series_', frequency, '_ridership.csv', sep="")
 nyc_ts = read.csv(filepath, header = TRUE, row.names = 1)
 colnames(nyc_ts) = gsub("X", "", colnames(nyc_ts))
 nyc_ts = nyc_ts %>% select(any_of(station_network_list))
 time_intervals = length(rownames(nyc_ts))
-nyc_ts = nyc_ts[(time_intervals-30):time_intervals,]
 nyc_ts
 nyc_ts = ts(nyc_ts)
 class(nyc_ts)
@@ -35,9 +35,15 @@ nyc_adjacency = nyc_adjacency[station_network_labels, station_network_labels]
 nyc_net = matrixtoGNAR(nyc_adjacency)
 nyc_net
 
-plot(nyc_net, vertex.label = station_network_labels, arrow.mode = '-', directed = FALSE)
+# plot(nyc_net, vertex.label = station_network_labels, arrow.mode = '-', directed = FALSE)
+ts.plot(rowMeans(nyc_ts))
+nyc_ts_diff = diff(nyc_ts, lag = 1)
+ts.plot(rowMeans(nyc_ts_diff))
 
-answer = GNARfit(vts = nyc_ts, net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
+## reduce number of stations / number of lines / alter to line usage and edge weights based on number of interchanges between them
+
+answer = GNARfit(vts = nyc_ts_diff, net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
+summary(answer)
 
 nyc_ts
 
