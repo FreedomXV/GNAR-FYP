@@ -7,6 +7,7 @@ setwd(dir)
 library("GNAR")
 library("igraph")
 library("tidyverse")
+library("forecast")
 
 frequency = 'monthly'
 alphaOrder = 1
