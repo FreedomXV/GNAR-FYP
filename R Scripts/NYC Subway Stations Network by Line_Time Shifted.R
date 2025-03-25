@@ -8,15 +8,22 @@ library("igraph")
 library("tidyverse")
 library("forecast")
 
-frequency = 'monthly'
+frequency = 'daily'
 alphaOrder = 12
 betaRep = 2
 betaOrder = c(rep(betaRep, alphaOrder))
+
 forecast_steps = 1
+time_lag = 7
+diff_order = 4
 if (frequency == 'monthly'){
   forecast_steps = 12
+  time_lag = 1
+  diff_order = 1
 } else if (frequency == 'daily'){
   forecast_steps = 365
+  time_lag = 28
+  diff_order = 1
 }
 nyc_line_focus = 1
 
@@ -47,13 +54,13 @@ for (i in 1:length(colnames(nyc_ts))){
 }
 
 ts.plot(rowMeans(nyc_ts))
-nyc_ts_diff = diff(nyc_ts)
+nyc_ts_diff = diff(nyc_ts, lag = time_lag, differences = diff_order)
 ts.plot(rowMeans(nyc_ts_diff))
 nyc_ts_diff_norm = (nyc_ts_diff - mean(nyc_ts_diff)) / sd(nyc_ts_diff)
 
 library(tseries)
 # Perform the Augmented Dickey-Fuller Test
-adf_result <- adf.test(rowMeans(nyc_ts_diff_norm))
+adf_result <- adf.test(rowMeans(nyc_ts_diff_norm), k = time_lag)
 print(adf_result)
 
 # Stationary under the assumption
@@ -101,7 +108,14 @@ for (beta in 0:(maxBeta)){
   }
 }
 
+save_dir = paste('R Scripts/GNAR Predictions/', frequency, '_timeLag', time_lag, '_alpha', alphaOrder, '_beta', betaRep, '_forecast', forecast_steps, '_480 by 320', '/', sep="")
+dir.create(file.path(save_dir))
+
 contour(1:maxAlpha, 0:maxBeta, log(abs(floor(min(BICmat))) + BICmat), xlab = "alphaOrder", ylab = "betaOrder")
+
+plotout = paste(save_dir, 'countour_plot', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
 
 # best reasonable model determined to be alpha = 11, betaRep = 0 (lower betaRep is better)
 
@@ -118,7 +132,7 @@ sample_models = 50
 if (frequency == 'monthly'){
   sample_models = (maxLag+1)**alphaOrder
 } else if (frequency == 'daily'){
-  sample_models = 50
+  sample_models = 100
 }
 
 betaSamples = matrix(0, ncol = alphaOrder, nrow = sample_models)
@@ -148,6 +162,16 @@ if (frequency == 'monthly'){
 
 plot(BICSamples)
 
+coefout = paste(save_dir, 'beta_samples', '.csv', sep="")
+write.csv(betaSamples, coefout)
+
+coefout = paste(save_dir, 'BIC_samples', '.csv', sep="")
+write.csv(BICSamples, coefout)
+
+plotout = paste(save_dir, 'BIC_samples', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
 dim(nyc_ts)
 
 # Checking pred vs actual
@@ -159,13 +183,15 @@ error_plot = data.frame(
   BIC = c(1:sample_models)
 )
 
-calculate_mspe = function(predictions, actual){
+calculate_mspe = function(model, actual_ts, forecast_steps){
+  predictions = predict(model, n.ahead = forecast_steps)
+  actual = actual_ts[(length(actual_ts[, 1]) - forecast_steps + 1):(length(actual_ts[, 1])),]
+  
   pred_errors = actual - predictions
   ME = mean(pred_errors)
   VAR = sd(pred_errors)^2
   return (ME^2 + VAR)
 }
-
 
 for (model_no in 1:sample_models){
   error_plot['model_no'][model_no,] = model_no
@@ -173,9 +199,9 @@ for (model_no in 1:sample_models){
   error_plot['BIC'][model_no,] = BIC(modelFit)
   print('BIC')
   print(BIC(modelFit))
-  predictions = predict(modelFit, n.ahead = forecast_steps)
-  actual = nyc_ts_diff_norm[(length(nyc_ts_diff_norm[, 1]) - forecast_steps + 1):(length(nyc_ts_diff_norm[, 1])),]
-  pred_error = calculate_mspe(predictions, actual)
+  
+  pred_error = calculate_mspe(modelFit, nyc_ts_diff_norm, forecast_steps)
+  
   print('error')
   print(pred_error)
   error_plot['pred_error'][model_no,] = pred_error
@@ -183,6 +209,13 @@ for (model_no in 1:sample_models){
 }
 
 boxplot(pred_error ~ model_no, data = error_plot)
+
+coefout = paste(save_dir, 'error_plots', '.csv', sep="")
+write.csv(error_plot, coefout)
+
+plotout = paste(save_dir, 'pred_error_plot', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
 
 # data_frame[which.min(data_frame$C4),]
 min_error = which.min(error_plot$pred_error)
@@ -194,8 +227,10 @@ norminv = function(ts){
 }
 
 # plot based on the minimum BIC
+inv_nyc_ts = diffinv(nyc_ts_diff, lag = time_lag, differences = diff_order, xi = matrix(nyc_ts[1:(time_lag*diff_order),], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)))
+ts.plot(rowMeans(inv_nyc_ts))
 plot(nyc_ts[, nyc_line_focus], ylab = "Ridership Volume", xlab = "Timestamp")
-ts_corrected = diffinv(norminv(nyc_ts_diff_norm), xi = matrix(nyc_ts[1,], ncol = ncol(nyc_ts), nrow = 1))
+ts_corrected = diffinv(norminv(nyc_ts_diff_norm), xi = matrix(nyc_ts[1:(time_lag*diff_order),], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
 plot(ts_corrected[, nyc_line_focus], ylab = "Ridership Volume", xlab = "Timestamp")
 
 min_BIC_model = GNARfit(vts = nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),], net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaSamples[min_BIC, ])
@@ -214,18 +249,54 @@ pred
 pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),])), pred[, nyc_line_focus])
 lines(pred_shifted, col = 3)
 
-xi_base = matrix(nyc_ts[1,], ncol = ncol(nyc_ts), nrow = 1)
-diffinv(norminv(nyc_ts_diff_norm), xi = xi_base)
+plotout = paste(save_dir, 'timeplot_', 'min_BIC_model_diff', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
 
 plot(c(nyc_ts[, nyc_line_focus]), ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
 
-inv_fitted = diffinv(norminv(fitted_ans), xi = matrix(nyc_ts[alphaOrder+1, ], ncol = ncol(nyc_ts), nrow = 1))
+inv_fitted = diffinv(norminv(fitted_ans), xi = matrix(nyc_ts[alphaOrder:(alphaOrder - 1 + (time_lag*diff_order)),], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
 inv_fitted_shifted = c(rep(NA, alphaOrder), inv_fitted[, nyc_line_focus])
 lines(inv_fitted_shifted, col = 2)
 
-inv_pred = diffinv(norminv(pred), xi = matrix(nyc_ts[(length(nyc_ts[, 1]) - forecast_steps), ], ncol = ncol(nyc_ts), nrow = 1))
+inv_pred = diffinv(norminv(pred), xi = matrix(nyc_ts[(length(nyc_ts[, 1]) - forecast_steps):(length(nyc_ts[, 1]) - forecast_steps - 1 + (time_lag*diff_order)), ], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
 inv_pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts[, 1]) - forecast_steps),])), inv_pred[, nyc_line_focus])
 lines(inv_pred_shifted, col = 3)
+calculate_mspe(min_BIC_model, nyc_ts_diff_norm, forecast_steps)
+
+plotout = paste(save_dir, 'timeplot_', 'min_BIC_model_inv', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
+coef(min_BIC_model)
+coefout = paste(save_dir, 'coefficients_', 'min_BIC_model', '.csv', sep="")
+write.csv(coef(min_BIC_model), coefout)
+
+meta_beta_vector = c(betaSamples[min_BIC, ])
+meta_BIC = BIC(min_BIC_model)
+meta_mspe = calculate_mspe(min_BIC_model, nyc_ts_diff_norm, forecast_steps)
+meta_rss = calculate_rss(min_BIC_model)
+meta_RSquared = 'TODO'
+
+meta_summary = summary(min_BIC_model)
+sum_out = paste(save_dir, 'meta_summary_min_BIC_model.txt')
+sink(sum_out)
+print(summary(min_BIC_model))
+sink()
+
+max_length = max(c(length(betaOrder), length(meta_BIC), length(meta_mspe), length(meta_rss), length(meta_RSquared), length(meta_summary)))
+
+metadata = data.frame(
+  betaOrder = c(meta_beta_vector,rep(NA, max_length - length(meta_beta_vector))),
+  BIC = c(meta_BIC,rep(NA, max_length - length(meta_BIC))),
+  mspe = c(meta_mspe,rep(NA, max_length - length(meta_mspe))),
+  rss = c(meta_rss,rep(NA, max_length - length(meta_rss))),
+  RSquared = c(meta_RSquared,rep(NA, max_length - length(meta_RSquared))),
+  summary = c(meta_summary,rep(NA, max_length - length(meta_summary)))
+)
+
+coefout = paste(save_dir, 'metadata_', 'min_BIC_model', '.csv', sep="")
+write.csv(metadata, coefout)
 
 # plot based on the minimum prediction error
 plot(nyc_ts[, nyc_line_focus], ylab = "Ridership Volume", xlab = "Timestamp")
@@ -245,15 +316,189 @@ pred
 pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),])), pred[, nyc_line_focus])
 lines(pred_shifted, col = 3)
 
-xi_base = matrix(nyc_ts[1,], ncol = ncol(nyc_ts), nrow = 1)
-diffinv(norminv(nyc_ts_diff_norm), xi = xi_base)
+plotout = paste(save_dir, 'timeplot_', 'min_error_model_diff', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
 
 plot(c(nyc_ts[, nyc_line_focus]), ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
 
-inv_fitted = diffinv(norminv(fitted_ans), xi = matrix(nyc_ts[alphaOrder+1, ], ncol = ncol(nyc_ts), nrow = 1))
+inv_fitted = diffinv(norminv(fitted_ans), xi = matrix(nyc_ts[alphaOrder:(alphaOrder - 1 + (time_lag*diff_order)),], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
 inv_fitted_shifted = c(rep(NA, alphaOrder), inv_fitted[, nyc_line_focus])
 lines(inv_fitted_shifted, col = 2)
 
-inv_pred = diffinv(norminv(pred), xi = matrix(nyc_ts[(length(nyc_ts[, 1]) - forecast_steps), ], ncol = ncol(nyc_ts), nrow = 1))
+inv_pred = diffinv(norminv(pred), xi = matrix(nyc_ts[(length(nyc_ts[, 1]) - forecast_steps):(length(nyc_ts[, 1]) - forecast_steps - 1 + (time_lag*diff_order)), ], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
 inv_pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts[, 1]) - forecast_steps),])), inv_pred[, nyc_line_focus])
 lines(inv_pred_shifted, col = 3)
+
+plotout = paste(save_dir, 'timeplot_', 'min_error_model_inv', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
+coef(min_error_model)
+coefout = paste(save_dir, 'coefficients_', 'min_error_model', '.csv', sep="")
+write.csv(coef(min_error_model), coefout)
+
+meta_beta_vector = c(betaSamples[min_error, ])
+meta_BIC = BIC(min_error_model)
+meta_mspe = calculate_mspe(min_error_model, nyc_ts_diff_norm, forecast_steps)
+meta_rss = calculate_rss(min_error_model)
+meta_RSquared = 'TODO'
+
+meta_summary = summary(min_error_model)
+sum_out = paste(save_dir, 'meta_summary_min_error_model.txt')
+sink(sum_out)
+print(summary(min_error_model))
+sink()
+
+max_length = max(c(length(betaOrder), length(meta_BIC), length(meta_mspe), length(meta_rss), length(meta_RSquared), length(meta_summary)))
+
+metadata = data.frame(
+  betaOrder = c(meta_beta_vector,rep(NA, max_length - length(meta_beta_vector))),
+  BIC = c(meta_BIC,rep(NA, max_length - length(meta_BIC))),
+  mspe = c(meta_mspe,rep(NA, max_length - length(meta_mspe))),
+  rss = c(meta_rss,rep(NA, max_length - length(meta_rss))),
+  RSquared = c(meta_RSquared,rep(NA, max_length - length(meta_RSquared))),
+  summary = c(meta_summary,rep(NA, max_length - length(meta_summary)))
+)
+
+coefout = paste(save_dir, 'metadata_', 'min_error_model', '.csv', sep="")
+write.csv(metadata, coefout)
+
+# plot based on beta 0 model
+betaRep = 0
+betaOrder = c(rep(betaRep, alphaOrder))
+plot(nyc_ts[, nyc_line_focus], ylab = "Ridership Volume", xlab = "Timestamp")
+
+beta0_model = GNARfit(vts = nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),], net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
+
+# ts_shifted = c(nyc_ts_diff_norm[, nyc_line_focus], rep(NA, forecast_steps))
+
+plot(c(nyc_ts_diff_norm[, nyc_line_focus]), ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
+fitted_ans = fitted(beta0_model)
+lines(fitted_ans[, nyc_line_focus], col = 2)
+
+pred = predict(beta0_model, n.ahead = forecast_steps)
+colnames(pred) = station_network_labels
+pred
+
+pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),])), pred[, nyc_line_focus])
+lines(pred_shifted, col = 3)
+
+plotout = paste(save_dir, 'timeplot_', 'beta0_model_diff', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
+plot(c(nyc_ts[, nyc_line_focus]), ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
+
+inv_fitted = diffinv(norminv(fitted_ans), xi = matrix(nyc_ts[alphaOrder:(alphaOrder - 1 + (time_lag*diff_order)),], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
+inv_fitted_shifted = c(rep(NA, alphaOrder), inv_fitted[, nyc_line_focus])
+lines(inv_fitted_shifted, col = 2)
+
+inv_pred = diffinv(norminv(pred), xi = matrix(nyc_ts[(length(nyc_ts[, 1]) - forecast_steps):(length(nyc_ts[, 1]) - forecast_steps - 1 + (time_lag*diff_order)), ], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
+inv_pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts[, 1]) - forecast_steps),])), inv_pred[, nyc_line_focus])
+lines(inv_pred_shifted, col = 3)
+calculate_mspe(beta0_model, nyc_ts_diff_norm, forecast_steps)
+
+plotout = paste(save_dir, 'timeplot_', 'beta0_model_inv', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
+coef(beta0_model)
+coefout = paste(save_dir, 'coefficients_', 'beta0_model', '.csv', sep="")
+write.csv(coef(beta0_model), coefout)
+
+meta_beta_vector = betaOrder
+meta_BIC = BIC(beta0_model)
+meta_mspe = calculate_mspe(beta0_model, nyc_ts_diff_norm, forecast_steps)
+meta_rss = calculate_rss(beta0_model)
+meta_RSquared = 'TODO'
+
+meta_summary = summary(beta0_model)
+sum_out = paste(save_dir, 'meta_summary_beta0_model.txt')
+sink(sum_out)
+print(summary(beta0_model))
+sink()
+
+max_length = max(c(length(betaOrder), length(meta_BIC), length(meta_mspe), length(meta_rss), length(meta_RSquared), length(meta_summary)))
+
+metadata = data.frame(
+  betaOrder = c(meta_beta_vector,rep(NA, max_length - length(meta_beta_vector))),
+  BIC = c(meta_BIC,rep(NA, max_length - length(meta_BIC))),
+  mspe = c(meta_mspe,rep(NA, max_length - length(meta_mspe))),
+  rss = c(meta_rss,rep(NA, max_length - length(meta_rss))),
+  RSquared = c(meta_RSquared,rep(NA, max_length - length(meta_RSquared))),
+  summary = c(meta_summary,rep(NA, max_length - length(meta_summary)))
+)
+
+coefout = paste(save_dir, 'metadata_', 'beta0_model', '.csv', sep="")
+write.csv(metadata, coefout)
+
+# plot based on beta 1 model
+betaRep = 1
+betaOrder = c(rep(betaRep, alphaOrder))
+plot(nyc_ts[, nyc_line_focus], ylab = "Ridership Volume", xlab = "Timestamp")
+
+beta1_model = GNARfit(vts = nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),], net = nyc_net, alphaOrder = alphaOrder, betaOrder = betaOrder)
+
+# ts_shifted = c(nyc_ts_diff_norm[, nyc_line_focus], rep(NA, forecast_steps))
+
+plot(c(nyc_ts_diff_norm[, nyc_line_focus]), ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
+fitted_ans = fitted(beta1_model)
+lines(fitted_ans[, nyc_line_focus], col = 2)
+
+pred = predict(beta1_model, n.ahead = forecast_steps)
+colnames(pred) = station_network_labels
+pred
+
+pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts_diff_norm[, 1]) - forecast_steps),])), pred[, nyc_line_focus])
+lines(pred_shifted, col = 3)
+
+plotout = paste(save_dir, 'timeplot_', 'beta1_model_diff', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
+plot(c(nyc_ts[, nyc_line_focus]), ylab = "Ridership Volume", xlab = "Timestamp", type = "l")
+
+inv_fitted = diffinv(norminv(fitted_ans), xi = matrix(nyc_ts[alphaOrder:(alphaOrder - 1 + (time_lag*diff_order)),], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
+inv_fitted_shifted = c(rep(NA, alphaOrder), inv_fitted[, nyc_line_focus])
+lines(inv_fitted_shifted, col = 2)
+
+inv_pred = diffinv(norminv(pred), xi = matrix(nyc_ts[(length(nyc_ts[, 1]) - forecast_steps):(length(nyc_ts[, 1]) - forecast_steps - 1 + (time_lag*diff_order)), ], ncol = ncol(nyc_ts), nrow = (time_lag*diff_order)), lag = time_lag, differences = diff_order)
+inv_pred_shifted = c(rep(NA, nrow(nyc_ts_diff_norm[1:(length(nyc_ts[, 1]) - forecast_steps),])), inv_pred[, nyc_line_focus])
+lines(inv_pred_shifted, col = 3)
+calculate_mspe(beta1_model, nyc_ts_diff_norm, forecast_steps)
+
+plotout = paste(save_dir, 'timeplot_', 'beta1_model_inv', '.png', sep="")
+dev.copy(png, filename=plotout, width = 480, height = 320)
+dev.off()
+
+coef(beta1_model)
+coefout = paste(save_dir, 'coefficients_', 'beta1_model', '.csv', sep="")
+write.csv(coef(beta1_model), coefout)
+
+meta_beta_vector = betaOrder
+meta_BIC = BIC(beta1_model)
+meta_mspe = calculate_mspe(beta1_model, nyc_ts_diff_norm, forecast_steps)
+meta_rss = calculate_rss(beta1_model)
+meta_RSquared = 'TODO'
+
+meta_summary = summary(beta1_model)
+sum_out = paste(save_dir, 'meta_summary_beta1_model.txt')
+sink(sum_out)
+print(summary(beta1_model))
+sink()
+
+max_length = max(c(length(betaOrder), length(meta_BIC), length(meta_mspe), length(meta_rss), length(meta_RSquared), length(meta_summary)))
+
+metadata = data.frame(
+  betaOrder = c(meta_beta_vector,rep(NA, max_length - length(meta_beta_vector))),
+  BIC = c(meta_BIC,rep(NA, max_length - length(meta_BIC))),
+  mspe = c(meta_mspe,rep(NA, max_length - length(meta_mspe))),
+  rss = c(meta_rss,rep(NA, max_length - length(meta_rss))),
+  RSquared = c(meta_RSquared,rep(NA, max_length - length(meta_RSquared))),
+  summary = c(meta_summary,rep(NA, max_length - length(meta_summary)))
+)
+
+coefout = paste(save_dir, 'metadata_', 'beta1_model', '.csv', sep="")
+write.csv(metadata, coefout)
+

@@ -9,9 +9,9 @@ library("igraph")
 library("tidyverse")
 library("forecast")
 
-frequency = 'monthly'
-alphaOrder = 1
-betaRep = 1
+frequency = 'daily'
+alphaOrder = 365
+betaRep = 3
 betaOrder = c(rep(betaRep, alphaOrder))
 # forecast_steps = 12
 # nyc_stn_focus = 1
