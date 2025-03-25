@@ -1,0 +1,35 @@
+
+Call:
+lm(formula = yvec ~ dmat + 0)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-13.4025  -0.0915   0.0016   0.1218   8.2550 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+dmatalpha1   0.372493   0.005907  63.060  < 2e-16 ***
+dmatbeta1.1  0.001105   0.004624   0.239  0.81118    
+dmatalpha2   0.051582   0.004903  10.520  < 2e-16 ***
+dmatalpha3   0.044713   0.006279   7.121 1.09e-12 ***
+dmatbeta3.1  0.023315   0.007586   3.074  0.00212 ** 
+dmatbeta3.2 -0.018835   0.015893  -1.185  0.23599    
+dmatbeta3.3 -0.021431   0.027798  -0.771  0.44073    
+dmatbeta3.4  0.074419   0.049228   1.512  0.13061    
+dmatalpha4   0.049266   0.004908  10.037  < 2e-16 ***
+dmatalpha5   0.030841   0.006504   4.742 2.12e-06 ***
+dmatbeta5.1  0.016368   0.007389   2.215  0.02676 *  
+dmatbeta5.2 -0.011441   0.008873  -1.289  0.19725    
+dmatalpha6   0.029525   0.006703   4.405 1.06e-05 ***
+dmatbeta6.1  0.004325   0.005558   0.778  0.43654    
+dmatalpha7  -0.401189   0.006231 -64.387  < 2e-16 ***
+dmatbeta7.1 -0.006870   0.007255  -0.947  0.34370    
+dmatbeta7.2 -0.006686   0.008645  -0.773  0.43926    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.7283 on 40495 degrees of freedom
+Multiple R-squared:  0.3597,	Adjusted R-squared:  0.3595 
+F-statistic:  1338 on 17 and 40495 DF,  p-value: < 2.2e-16
+
+GNAR BIC: -125.7973NULL
