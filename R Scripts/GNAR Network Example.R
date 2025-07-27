@@ -119,9 +119,9 @@ vswind_answer = GNARfit(vts=vswindts,net=vswindnet,alphaOrder=1, betaOrder=0)
 
 # for loop to test different betaOrders
 
-BIC.Alpha2.Beta <- matrix(0, ncol = 15, nrow = 15)
-for(b1 in 0:14){
-  for(b2 in 0:14){
+BIC.Alpha2.Beta <- matrix(0, ncol = 5, nrow = 5)
+for(b1 in 0:4){
+  for(b2 in 0:4){
     print(b1)
     print(b2)
     print('calculating BIC')
@@ -129,7 +129,7 @@ for(b1 in 0:14){
   }
 }
   
-contour(0:14, 0:14, log(251 + BIC.Alpha2.Beta), xlab = "Lag 1 Neighbor Order", ylab = "Lag 2 Neighbor Order")
+contour(0:4, 0:4, log(251 + BIC.Alpha2.Beta), xlab = "Lag 1 Neighbor Order", ylab = "Lag 2 Neighbor Order")
 
 goodmodel <- GNARfit(vts = vswindts, net = vswindnet, alphaOrder = 2, betaOrder = c(5, 1))
 goodmodel
@@ -143,11 +143,13 @@ prediction
 # install.packages('fields')
 
 library("fields")
+
 layout(matrix(c(1, 2), nrow = 1, ncol = 2), widths = c(4.5, 1))
 image(t(apply(gdpVTS, 1, rev)), xaxt = "n", yaxt = "n", col = gray.colors(14), xlab = "Year", ylab = "Country")
 axis(side = 1, at = seq(from = 0, to = 1, length = 52), labels = FALSE, col.ticks = "grey")
 axis(side = 1, at = seq(from = 0, to = 1, length = 52)[5*(1:11)], labels = (1:52)[5*(1:11)])
 axis(side = 2, at = seq(from = 1, to = 0, length = 35), labels = colnames(gdpVTS), las = 1, cex = 0.8)
+
 layout(matrix(1))
 image.plot(zlim = range(gdpVTS, na.rm = TRUE), legend.only = TRUE, col = gray.colors(14))
 
@@ -157,6 +159,57 @@ layout(matrix(c(2, 1), 1, 2))
 par(mar=c(0,1,0,1))
 plot(net1, vertex.label = colnames(gdpVTS), vertex.size = 0)
 plot(net2, vertex.label = colnames(gdpVTS), vertex.size = 0)
+
+gdpVTSn <- apply(gdpVTS, 2, function(x){x / sd(x[1:50], na.rm = TRUE)})
+alphas <- c(rep(1, 2), rep(2, 6))
+betas <- list(c(0), c(1), c(0, 0), c(1, 0), c(1, 1), c(2, 0), c(2, 1), c(2, 2))
+seedSim <- function(seedNo, modelNo, globalalpha){
+  net1 <- seedToNet(seed.no = seedNo, nnodes = 35, graph.prob = 0.15)
+  gdpPred <- predict(GNARfit(vts = gdpVTSn[1:50,], net = net1, alphaOrder = alphas[modelNo], betaOrder = betas[[modelNo]], globalalpha = globalalpha))
+  return(sum((gdpPred - gdpVTSn[51, ])^2))
+}
+
+seedSim(seedNo = seed.nos[1], modelNo = 1, globalalpha = TRUE)
+seedSim(seed.nos[1], modelNo = 3, globalalpha = TRUE)
+seedSim(seed.nos[1], modelNo = 3, globalalpha = FALSE)
+
+net921 <- seedToNet(seed.no = seed.nos[921], nnodes = 35, graph.prob = 0.15)
+layout(matrix(c(1), 1, 1))
+plot(net921, vertex.label = colnames(gdpVTS), vertex.size = 0)
+
+res <- rep(NA, 8)
+for(i in 1:8){
+  res[i] <- BIC(GNARfit(gdpVTSn[1:50, ], net = seedToNet(seed.nos[921], nnodes = 35, graph.prob = 0.15), alphaOrder = alphas[i], betaOrder = betas[[i]]))
+}
+
+order(res)
+sort(res)
+
+# 4.2 Results and Comparison between GNAR and VAR models
+
+gdpVTSn2 <- apply(gdpVTS, 2, function(x){x / sd(x[1:51], na.rm = TRUE)})
+gdpFit <- GNARfit(gdpVTSn2[1:51,], net = net921, alphaOrder = 2, betaOrder = c(2, 0))
+summary(gdpFit)
+
+sum((predict(gdpFit)- gdpVTSn2[52, ])^2)
+
+# Comparison with ARIMA model
+
+library("forecast")
+arforecast <- apply(gdpVTSn2[1:51, ], 2, function(x){
+  forecast(auto.arima(x[!is.na(x)], d = 0, D = 0, max.p = 2, max.q = 0, max.P = 0, max.Q = 0, stationary = TRUE, seasonal = FALSE, ic = 'bic', allowmean = FALSE, allowdrift = FALSE, trace = FALSE), h = 1)$mean
+})
+sum((arforecast- gdpVTSn2[52, ])^2)
+
+# install.packages('vars')
+library("vars")
+gdpVTSn2.0 <- gdpVTSn2
+gdpVTSn2.0[is.na(gdpVTSn2.0)] <- 0
+varforecast <- predict(restrict(VAR(gdpVTSn2.0[1:51, ], p = 1, type = "none")), n.ahead = 1)
+
+getfcst <- function(x){return(x[1])}
+varforecastpt <- unlist(lapply(varforecast$fcst, getfcst))
+sum((varforecastpt- gdpVTSn2.0[52, ])^2)
 
 ## -----------------------
 ## Scrap code from MRT
