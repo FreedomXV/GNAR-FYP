@@ -1,0 +1,57 @@
+"",E Week1,"Cumulative first1Week",,,,
+"",2023*,2022,Median,2023,2022,Median
+"",,,2018 -2022,2018 -2022,,
+FOOD/WATER-BORNE DISEASES,,,,,,
+Acute Hepatitis A,0,0,1,0,0,1
+Acute Hepatitis E,0,3,1,0,3,1
+Campylobacteriosis,10,0,14,10,0,14
+Cholera,0,0,0,0,0,0
+Paratyphoid,1,0,0,1,0,0
+Poliomyelitis,0,0,0,0,0,0
+Salmonellosis,13,0,24,13,0,24
+Typhoid,1,1,1,1,1,1
+VECTOR-BORNE DISEASES,,,,,,
+Chikungunya Fever,1,0,0,1,0,0
+Dengue Fever,284,106,194,284,106,194
+Dengue Haemorrhagic Fever,0,0,0,0,0,0
+Japanese Encephalitis^,0,0,0,0,0,0
+Leptospirosis^,2,1,0,2,1,0
+Malaria,0,0,1,0,0,1
+Murine Typhus^,0,0,0,0,0,0
+Nipah virus infection,0,0,0,0,0,0
+Plague,0,0,0,0,0,0
+Yellow Fever,0,0,0,0,0,0
+Zika Virus Infection,0,0,0,0,0,0
+AIR/DROPLET-BORNE DISEASES,,,,,,
+Avian Influenza,0,0,0,0,0,0
+Diphtheria,0,0,0,0,0,0
+Ebola Virus Disease,0,0,0,0,0,0
+Haemophilus influenzae  type b,0,0,0,0,0,0
+Legionellosis,0,0,0,0,0,0
+Measles,1,0,0,1,0,0
+Melioidosis,0,1,1,0,1,1
+Meningococcal Disease,0,0,0,0,0,0
+Monkeypox,2,0,NA,2,0,NA
+Mumps,2,0,5,2,0,5
+Pertussis,1,0,1,1,0,1
+Pneumococcal Disease (invasive),2,1,1,2,1,1
+Rubella,0,0,0,0,0,0
+Severe acute respiratory syndrome,0,0,0,0,0,0
+Tetanus^,0,0,0,0,0,0
+OTHER DISEASES,,,,,,
+Acute hepatitis B,0,0,1,0,0,1
+Acute hepatitis C,0,2,0,0,2,0
+Botulism^,0,2,0,0,2,0
+MERS-CoV,,,,,,
+Suspect cases tested,19,0,NA,19,0,NA
+Other patients tested,9,0,NA,9,0,NA
+POLYCLINIC ATTENDANCES - AVERAGE DAILY NUMBER,,,,,,
+Acute upper respiratory infections,2560,977,3158,,,
+Acute conjunctivitis,69,38,103,,,
+Acute Diarrhoea,352,297,580,,,
+Chickenpox,7,3,16,,,
+"Hand, Foot And Mouth Disease",10,9,NA,,NA,
+HIV/STI/TB NOTIFICATIONS,2022,Dec,,Cumulative 2022,,
+HIV/AIDS,15,,189,,,
+Legally Notifiable STIs*,299,,3822,,,
+Tuberculosis,107,,1256,,,

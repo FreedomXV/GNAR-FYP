@@ -1,0 +1,55 @@
+"",E Week17,"Cumulative first17Week",,,,
+"",2024*,2023,Median,2024,2023,Median
+"",,,2019 -2023,2019 -2023,,
+FOOD/WATER-BORNE DISEASES,,,,,,
+Acute Hepatitis A,1,0,0,11,14,12
+Acute Hepatitis E,0,1,0,10,23,17
+Campylobacteriosis,17,7,13,160,138,141
+Cholera,0,0,0,0,0,0
+Paratyphoid,3,0,0,10,5,4
+Poliomyelitis,0,0,0,0,0,0
+Salmonellosis,57,21,29,417,357,438
+Typhoid,0,1,1,17,21,21
+VECTOR-BORNE DISEASES,,,,,,
+Chikungunya Fever,0,0,0,3,4,4
+Dengue Fever,336,128,156,6545,2846,2846
+Dengue Haemorrhagic Fever,2,0,1,24,2,10
+Japanese Encephalitis,0,0,0,0,0,0
+Leptospirosis,0,0,1,18,19,10
+Malaria,1,1,0,7,4,4
+Murine Typhus,3,0,0,17,2,3
+Nipah Virus Infection,0,0,0,0,0,0
+Plague,0,0,0,0,0,0
+Yellow Fever,0,0,0,0,0,0
+Zika Virus Infection,1,1,0,6,1,1
+AIR/DROPLET-BORNE DISEASES,,,,,,
+Avian Influenza,0,0,0,0,0,0
+Diphtheria,0,0,0,0,0,0
+Ebola Virus Disease,0,0,0,0,0,0
+Haemophilus influenzae  type b,0,0,0,0,0,0
+Legionellosis,0,0,0,7,8,5
+Measles,0,1,0,6,5,5
+Melioidosis,1,1,1,8,14,14
+Meningococcal Disease,0,0,0,0,1,2
+Middle East Respiratory Syndrome^,0,0,0,0,0,0
+"#Mpox",0,2,NA,8,6,NA
+Mumps,2,1,3,85,54,63
+Pertussis,1,0,0,30,2,2
+Pneumococcal Disease (Invasive),3,3,1,48,49,32
+Rubella,0,0,0,0,0,0
+Severe Acute Respiratory Syndrome,0,0,0,0,0,0
+Tetanus,0,0,0,0,1,0
+OTHER DISEASES,,,,,,
+Acute Hepatitis B,1,0,0,9,12,13
+Acute Hepatitis C,0,0,0,5,4,6
+Botulism,0,0,0,0,0,0
+POLYCLINIC ATTENDANCES - AVERAGE DAILY NUMBER,,,,,,
+Acute Upper Respiratory Infections,2590,2737,1431,,,NA
+Acute Conjunctivitis,65,72,45,,,NA
+Acute Diarrhoea,381,341,416,,,NA
+Chickenpox,6,7,5,,,NA
+"Hand, Foot And Mouth Disease",22,21,11,,NA,
+HIV/STI/TB NOTIFICATIONS,2024,Mar,,Cumulative 2024,,
+HIV/AIDS,15,,40,,,
+Legally Notifiable STIs,278,,817,,,
+Tuberculosis,108,,327,,,
